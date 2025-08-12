@@ -1,0 +1,151 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+struct stack {
+    int size;
+    int top;
+    char *arr;
+};
+
+struct intStack {
+    int size;
+    int top;
+    int *arr;
+};
+
+int isEmpty(struct stack *ptr) {
+    return ptr->top == -1;
+}
+
+int isFull(struct stack *ptr) {
+    return ptr->top == ptr->size - 1;
+}
+
+void push(struct stack *ptr, char val) {
+    if (!isFull(ptr)) {
+        ptr->arr[++ptr->top] = val;
+    }
+}
+
+char pop(struct stack *ptr) {
+    if (!isEmpty(ptr)) {
+        return ptr->arr[ptr->top--];
+    }
+    return -1;
+}
+
+char stackTop(struct stack *ptr) {
+    return ptr->arr[ptr->top];
+}
+
+int precedence(char ch) {
+    if (ch == '*' || ch == '/')
+        return 3;
+    else if (ch == '+' || ch == '-')
+        return 2;
+    else
+        return 0;
+}
+
+int isOperator(char ch) {
+    return (ch == '+' || ch == '-' || ch == '*' || ch == '/');
+}
+
+// Convert infix to postfix
+char* infixToPostfix(char* infix) {
+    struct stack *sp = (struct stack*)malloc(sizeof(struct stack));
+    sp->size = strlen(infix);
+    sp->top = -1;
+    sp->arr = (char*)malloc(sp->size * sizeof(char));
+
+    char *postfix = (char*)malloc((strlen(infix) + 1) * sizeof(char));
+    int i = 0, j = 0;
+
+    while (infix[i] != '\0') {
+        if (isalpha(infix[i])) {  // variable
+            postfix[j++] = infix[i++];
+        }
+        else if (infix[i] == '(') {
+            push(sp, infix[i++]);
+        }
+        else if (infix[i] == ')') {
+            while (!isEmpty(sp) && stackTop(sp) != '(') {
+                postfix[j++] = pop(sp);
+            }
+            pop(sp); // remove '('
+            i++;
+        }
+        else if (isOperator(infix[i])) {
+            while (!isEmpty(sp) && precedence(stackTop(sp)) >= precedence(infix[i])) {
+                postfix[j++] = pop(sp);
+            }
+            push(sp, infix[i++]);
+        }
+        else {
+            i++; // skip spaces
+        }
+    }
+
+    while (!isEmpty(sp)) {
+        postfix[j++] = pop(sp);
+    }
+    postfix[j] = '\0';
+    free(sp->arr);
+    free(sp);
+    return postfix;
+}
+
+// Evaluate postfix for variables
+int evaluatePostfix(char* postfix) {
+    struct intStack *st = (struct intStack*)malloc(sizeof(struct intStack));
+    st->size = strlen(postfix);
+    st->top = -1;
+    st->arr = (int*)malloc(st->size * sizeof(int));
+
+    int varValues[26]; // store values for variables a-z
+    int assigned[26] = {0}; // flag for each variable
+
+    for (int i = 0; postfix[i] != '\0'; i++) {
+        if (isalpha(postfix[i])) {
+            int index = tolower(postfix[i]) - 'a';
+            if (!assigned[index]) {
+                printf("Enter value for %c: ", postfix[i]);
+                scanf("%d", &varValues[index]);
+                assigned[index] = 1;
+            }
+            st->arr[++st->top] = varValues[index];
+        }
+        else if (isOperator(postfix[i])) {
+            int val2 = st->arr[st->top--];
+            int val1 = st->arr[st->top--];
+            switch (postfix[i]) {
+                case '+': st->arr[++st->top] = val1 + val2; break;
+                case '-': st->arr[++st->top] = val1 - val2; break;
+                case '*': st->arr[++st->top] = val1 * val2; break;
+                case '/': st->arr[++st->top] = val1 / val2; break;
+            }
+        }
+    }
+    int result = st->arr[st->top--];
+    free(st->arr);
+    free(st);
+    return result;
+}
+
+// Driver
+int main() {
+    char infix[100];
+    printf("Enter infix expression (variables a-z): ");
+    scanf("%s", infix);
+
+    char *postfix = infixToPostfix(infix);
+    printf("Postfix Expression: %s\n", postfix);
+
+    int result = evaluatePostfix(postfix);
+    printf("Evaluation Result: %d\n", result);
+
+    free(postfix);
+    return 0;
+}
