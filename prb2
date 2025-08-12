@@ -1,0 +1,173 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Deque {
+    int size;
+    int front;
+    int rear;
+    int* arr;
+};
+
+int isEmpty(struct Deque* dq) {
+    return dq->front == -1;
+}
+
+int isFull(struct Deque* dq) {
+    return ((dq->rear + 1) % dq->size == dq->front);
+}
+
+// Insert at rear
+void enqueueRear(struct Deque* dq, int val) {
+    if (isFull(dq)) {
+        printf("Deque is full. Cannot insert at rear.\n");
+        return;
+    }
+
+    if (isEmpty(dq)) {
+        dq->front = dq->rear = 0;
+    } else {
+        dq->rear = (dq->rear + 1) % dq->size;
+    }
+
+    dq->arr[dq->rear] = val;
+    printf("Inserted %d at rear.\n", val);
+}
+
+// Insert at front
+void enqueueFront(struct Deque* dq, int val) {
+    if (isFull(dq)) {
+        printf("Deque is full. Cannot insert at front.\n");
+        return;
+    }
+
+    if (isEmpty(dq)) {
+        dq->front = dq->rear = 0;
+    } else {
+        dq->front = (dq->front - 1 + dq->size) % dq->size;
+    }
+
+    dq->arr[dq->front] = val;
+    printf("Inserted %d at front.\n", val);
+}
+
+// Delete from front
+int dequeueFront(struct Deque* dq) {
+    if (isEmpty(dq)) {
+        printf("Deque is empty. Cannot dequeue from front.\n");
+        return -1;
+    }
+
+    int val = dq->arr[dq->front];
+
+    if (dq->front == dq->rear) {
+        dq->front = dq->rear = -1;
+    } else {
+        dq->front = (dq->front + 1) % dq->size;
+    }
+
+    printf("Deleted %d from front.\n", val);
+    return val;
+}
+
+// Delete from rear
+int dequeueRear(struct Deque* dq) {
+    if (isEmpty(dq)) {
+        printf("Deque is empty. Cannot dequeue from rear.\n");
+        return -1;
+    }
+
+    int val = dq->arr[dq->rear];
+
+    if (dq->front == dq->rear) {
+        dq->front = dq->rear = -1;
+    } else {
+        dq->rear = (dq->rear - 1 + dq->size) % dq->size;
+    }
+
+    printf("Deleted %d from rear.\n", val);
+    return val;
+}
+
+// Display function (for debugging)
+void display(struct Deque* dq) {
+    if (isEmpty(dq)) {
+        printf("Deque is empty.\n");
+        return;
+    }
+
+    printf("Deque elements: ");
+    int i = dq->front;
+    while (1) {
+        printf("%d ", dq->arr[i]);
+        if (i == dq->rear)
+            break;
+        i = (i + 1) % dq->size;
+    }
+    printf("\n");
+}
+
+int main() {
+    struct Deque dq;
+    printf("Enter size of deque: ");
+    scanf("%d", &dq.size);
+    dq.arr = (int*)malloc(dq.size * sizeof(int));
+    dq.front = dq.rear = -1;
+
+    int choice, val;
+
+    while (1) {
+        printf("\n=== DEQUE MENU ===\n");
+        printf("1. Enqueue Rear\n");
+        printf("2. Enqueue Front\n");
+        printf("3. Dequeue Rear\n");
+        printf("4. Dequeue Front\n");
+        printf("5. Check if Empty\n");
+        printf("6. Check if Full\n");
+        printf("7. Display\n");
+        printf("8. Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter value: ");
+                scanf("%d", &val);
+                enqueueRear(&dq, val);
+                break;
+            case 2:
+                printf("Enter value: ");
+                scanf("%d", &val);
+                enqueueFront(&dq, val);
+                break;
+            case 3:
+                dequeueRear(&dq);
+                break;
+            case 4:
+                dequeueFront(&dq);
+                break;
+            case 5:
+                if (isEmpty(&dq))
+                    printf("Deque is empty.\n");
+                else
+                    printf("Deque is not empty.\n");
+                break;
+            case 6:
+                if (isFull(&dq))
+                    printf("Deque is full.\n");
+                else
+                    printf("Deque is not full.\n");
+                break;
+            case 7:
+                display(&dq);
+                break;
+            case 8:
+                printf("Exiting...\n");
+                free(dq.arr);
+                return 0;
+            default:
+                printf("Invalid choice.\n");
+        }
+    }
+
+    return 0;
+}
