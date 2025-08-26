@@ -160,32 +160,65 @@ struct Node* deleteEnd(struct Node *head) {
 }
 
 // Delete at position
+// struct Node* deleteAtPos(struct Node *head, int pos) {
+//     if (head == NULL) {
+//         printf("List is empty!\n");
+//         return NULL;
+//     }
+
+//     if (pos == 1) {
+//         return deleteFirst(head);
+//     }
+
+//     struct Node *p = head;
+//     for (int i = 1; i < pos && p->next != head; i++) {
+//         p = p->next;
+//     }
+
+//     if (p == head) {
+//         printf("Invalid position!\n");
+//         return head;
+//     }
+
+//     p->prev->next = p->next;
+//     p->next->prev = p->prev;
+//     free(p);
+
+//     return head;
+// }
+
 struct Node* deleteAtPos(struct Node *head, int pos) {
     if (head == NULL) {
         printf("List is empty!\n");
         return NULL;
     }
-
+    if (pos <= 0) {
+        printf("Invalid position!\n");
+        return head;
+    }
     if (pos == 1) {
         return deleteFirst(head);
     }
 
     struct Node *p = head;
-    for (int i = 1; i < pos && p->next != head; i++) {
+    int i;
+    for (i = 1; i < pos && p->next != head; i++) {
         p = p->next;
     }
 
-    if (p == head) {
+    // If we didn't actually reach 'pos', it's invalid
+    if (i != pos) {
         printf("Invalid position!\n");
         return head;
     }
 
+    // Now p points to the node at 'pos'
     p->prev->next = p->next;
     p->next->prev = p->prev;
     free(p);
-
     return head;
 }
+
 
 // Search
 void search(struct Node *head, int key) {
@@ -293,4 +326,3 @@ int main() {
     }
     return 0;
 }
-
