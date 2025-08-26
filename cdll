@@ -10,17 +10,45 @@ struct Node {
 struct Node *head = NULL;
 
 // Traversal
+// void display(struct Node *head) {
+//     if (head == NULL) {
+//         printf("List is empty!\n");
+//         return;
+//     }
+//     struct Node *ptr = head;
+//     printf("List elements:");
+//     do {
+//         printf("%d ", ptr->data);
+//         ptr = ptr->next;
+//     } while (ptr != head);
+//     printf("\n");
+// }
+
+// Traversal
 void display(struct Node *head) {
     if (head == NULL) {
         printf("List is empty!\n");
         return;
     }
+
     struct Node *ptr = head;
-    printf("List elements:");
+
+    // Forward direction
+    printf("Forward: ");
     do {
         printf("%d ", ptr->data);
         ptr = ptr->next;
     } while (ptr != head);
+    printf("\n");
+
+    // Backward direction
+    struct Node *last = head->prev;
+    ptr = last;
+    printf("Backward: ");
+    do {
+        printf("%d ", ptr->data);
+        ptr = ptr->prev;
+    } while (ptr != last);
     printf("\n");
 }
 
@@ -265,3 +293,4 @@ int main() {
     }
     return 0;
 }
+
