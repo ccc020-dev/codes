@@ -1,0 +1,122 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+struct stack{
+    int size;
+    int top;
+    int *arr;
+};
+
+
+
+int isEmpty(struct stack*ptr){
+    if(ptr->top == -1){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+int isFull(struct stack*ptr){
+    if(ptr->top == ptr->size-1){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+
+void push(struct stack*ptr, int val){
+    if(isFull(ptr)){
+        printf("Stack overflow. %d element cannot be pushed into the stack\n",val);
+    }
+    else{
+        ptr->top++;
+        ptr->arr[ptr->top]=val;
+        printf("%d pushed to the stack",val);
+    }
+}
+
+
+int pop(struct stack*ptr){
+    if (isEmpty(ptr)){
+        printf("stack underflow. element can't be poped");
+        return -1;
+    }
+    else{
+        int val=ptr->arr[ptr->top];
+        ptr->top--;
+        printf("%d poped from the stack",val);
+        return val;
+    }
+}
+
+int peek(struct stack*ptr){
+    if (isEmpty(ptr)){
+        printf("nothing to peek,stack is empty\n");
+        return -1;
+    }
+    else{
+        printf("Top element is %d\n",ptr->arr[ptr->top]);
+        return ptr->arr[ptr->top];
+    }
+}
+int main()
+{
+    struct stack*sp= (struct stack*)malloc(sizeof(struct stack));
+    printf("enter size of stack:");
+    scanf("%d",& sp->size);
+    sp->top = -1;
+    sp->arr=(int*)malloc(sp->size*sizeof(int));
+    printf("stack created successfully with size %d\n\n");
+
+
+    int choice,val;
+
+    while(1){
+        printf("\n Stack menu\n");
+        printf("1. push\n");
+        printf("2. pop\n");
+        printf("3. peek\n");
+        printf("4. check is empty\n");
+        printf("5. check is full\n");
+        printf("6. exit\n");
+        printf("enter your choice:");
+        scanf("%d",& choice);
+         
+        switch (choice){
+            case 1: printf("enter value to push:");
+                    scanf("%d",&val);
+                    push(sp,val);
+                    break;
+            case 2: pop(sp);
+                    break;
+            case 3: peek(sp);
+                    break;
+            case 4: if(isEmpty(sp)){
+                    printf("stack is empty\n");
+            }
+                    else{
+                        printf("stack is not empty\n");
+                    }
+                    break;
+            case 5: if(isFull(sp)){
+                    printf("stack is Full\n");
+            }
+                    else{
+                        printf("stack is not Full\n");
+                    }
+                    break;
+            case 6: printf("exiting program");
+                    free(sp->arr);
+                    free(sp);
+                    exit(0);
+
+                    default:
+                            printf("invalid choice, pls try again later:");
+        }
+    }
+    
+    return 0;
+}
