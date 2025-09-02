@@ -1,0 +1,110 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *next;
+};
+
+struct Node *front = NULL;
+struct Node *rear = NULL;
+
+// Check if queue is empty
+int isEmpty() {
+    return (front == NULL);
+}
+
+// Enqueue (Insert at rear)
+void enqueue(int x) {
+    struct Node *n = (struct Node *)malloc(sizeof(struct Node));
+    if (n == NULL) {
+        printf("Memory allocation failed! Cannot enqueue %d\n", x);
+        return;
+    }
+
+    n->data = x;
+    n->next = NULL;
+
+    if (front == NULL && rear == NULL) {
+        // first element
+        front = rear = n;
+    } else {
+        rear->next = n;
+        rear = n;
+    }
+    printf("%d enqueued to queue\n", x);
+}
+
+// Dequeue (Remove from front)
+void dequeue() {
+    if (isEmpty()) {
+        printf("Queue Underflow! Cannot dequeue\n");
+        return;
+    }
+
+    struct Node *temp = front;
+    printf("Dequeued element is %d\n", front->data);
+    front = front->next;
+    if (front == NULL) {
+        rear = NULL; // queue becomes empty
+    }
+    free(temp);
+}
+
+// Display queue elements
+void display() {
+    if (isEmpty()) {
+        printf("Queue is empty!\n");
+        return;
+    }
+    struct Node *ptr = front;
+    printf("Queue elements: ");
+    while (ptr != NULL) {
+        printf("%d ", ptr->data);
+        ptr = ptr->next;
+    }
+    printf("\n");
+}
+
+int main() {
+    int choice, value;
+
+    while (1) {
+        printf("\n===== QUEUE MENU (Singly Linked List) =====\n");
+        printf("1. Enqueue\n");
+        printf("2. Dequeue\n");
+        printf("3. isEmpty\n");
+        printf("4. Display\n");
+        printf("5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+        case 1:
+            printf("Enter value to enqueue: ");
+            scanf("%d", &value);
+            enqueue(value);
+            break;
+        case 2:
+            dequeue();
+            break;
+        case 3:
+            if (isEmpty()) {
+                printf("Queue is Empty\n");
+            } else {
+                printf("Queue is not Empty\n");
+            }
+            break;
+        case 4:
+            display();
+            break;
+        case 5:
+            printf("Exiting...\n");
+            exit(0);
+        default:
+            printf("Invalid Choice! Try again.\n");
+        }
+    }
+
+    return 0;
+}
