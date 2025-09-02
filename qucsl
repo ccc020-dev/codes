@@ -1,0 +1,93 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *next;
+};
+
+struct Node *rear = NULL;  // rear pointer, rear->next is front
+
+// Check if queue is empty
+int isEmpty() {
+    return (rear == NULL);
+}
+
+// Enqueue operation (insert at rear)
+void enqueue(int x) {
+    struct Node *n = (struct Node*)malloc(sizeof(struct Node));
+    if (n == NULL) {
+        printf("Queue Overflow! Cannot enqueue %d\n", x);
+        return;
+    }
+    n->data = x;
+
+    if (rear == NULL) {
+        // First node → points to itself
+        rear = n;
+        rear->next = rear;
+    } else {
+        n->next = rear->next; // new node points to front
+        rear->next = n;       // old rear points to new node
+        rear = n;             // update rear to new node
+    }
+    printf("%d enqueued to the queue\n", x);
+}
+
+// Dequeue operation (remove from front)
+void dequeue() {
+    if (isEmpty()) {
+        printf("Queue Underflow! Cannot dequeue\n");
+        return;
+    }
+
+    struct Node *front = rear->next; // front node is rear->next
+    if (rear == front) {
+        // Only one node
+        printf("Dequeued element is %d\n", front->data);
+        free(front);
+        rear = NULL;
+    } else {
+        printf("Dequeued element is %d\n", front->data);
+        rear->next = front->next; // rear now points to new front
+        free(front);
+    }
+}
+
+// Peek operation (check front element)
+void peek() {
+    if (isEmpty()) {
+        printf("Queue is empty\n");
+    } else {
+        printf("Front element is %d\n", rear->next->data);
+    }
+}
+
+// Display queue
+void display() {
+    if (isEmpty()) {
+        printf("Queue is empty\n");
+        return;
+    }
+    struct Node *ptr = rear->next; // start from front
+    printf("Queue elements -> ");
+    do {
+        printf("%d -> ", ptr->data);
+        ptr = ptr->next;
+    } while (ptr != rear->next);
+    printf("(back to front)\n");
+}
+
+// Main menu
+int main() {
+    int choice, value;
+
+    while (1) {
+        printf("\n-- QUEUE USING CIRCULAR SINGLY LINKED LIST MENU --\n");
+        printf("1. Enqueue\n");
+        printf("2. Dequeue\n");
+        printf("3. Peek\n");
+        printf("4. Is Empty\n");
+        printf("5. Display\n");
+        printf("6. Exit\n");
+        printf("Enter your choi
