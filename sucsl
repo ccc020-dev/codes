@@ -1,0 +1,135 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *next;
+};
+
+struct Node *top = NULL;
+
+// Check if stack is empty
+int isEmpty() {
+    return (top == NULL);
+}
+
+// Push operation
+void push(int x) {
+    struct Node *n = (struct Node*)malloc(sizeof(struct Node));
+    if (n == NULL) {
+        printf("Stack Overflow! Cannot push %d\n", x);
+        return;
+    }
+    n->data = x;
+
+    if (top == NULL) {
+        // First node → points to itself
+        n->next = n;
+        top = n;
+    } else {
+        // Insert new node at top
+        struct Node *temp = top;
+        while (temp->next != top) {
+            temp = temp->next;
+        }
+        n->next = top;
+        temp->next = n;
+        top = n;
+    }
+    printf("%d pushed to the stack\n", x);
+}
+
+// Pop operation
+void pop() {
+    if (isEmpty()) {
+        printf("Stack Underflow! Cannot pop\n");
+        return;
+    }
+    if (top->next == top) {
+        // Only one node
+        printf("Popped element is %d\n", top->data);
+        free(top);
+        top = NULL;
+    } else {
+        struct Node *temp = top;
+        struct Node *last = top;
+        while (last->next != top) {
+            last = last->next;
+        }
+        printf("Popped element is %d\n", top->data);
+        top = top->next;
+        last->next = top;
+        free(temp);
+    }
+}
+
+// Peek operation
+void peek() {
+    if (isEmpty()) {
+        printf("Stack is empty\n");
+    } else {
+        printf("Top element is %d\n", top->data);
+    }
+}
+
+// Display stack
+void display() {
+    if (isEmpty()) {
+        printf("Stack is empty\n");
+        return;
+    }
+    struct Node *ptr = top;
+    printf("Stack elements -> ");
+    do {
+        printf("%d -> ", ptr->data);
+        ptr = ptr->next;
+    } while (ptr != top);
+    printf("(back to top)\n");
+}
+
+// Main menu
+int main() {
+    int choice, value;
+
+    while (1) {
+        printf("\n-- STACK USING CIRCULAR SINGLY LINKED LIST MENU --\n");
+        printf("1. Push\n");
+        printf("2. Pop\n");
+        printf("3. Peek\n");
+        printf("4. Is Empty\n");
+        printf("5. Display\n");
+        printf("6. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter value to push: ");
+                scanf("%d", &value);
+                push(value);
+                break;
+            case 2:
+                pop();
+                break;
+            case 3:
+                peek();
+                break;
+            case 4:
+                if (isEmpty()) {
+                    printf("Stack is empty\n");
+                } else {
+                    printf("Stack is not empty\n");
+                }
+                break;
+            case 5:
+                display();
+                break;
+            case 6:
+                printf("Exit\n");
+                exit(0);
+            default:
+                printf("Invalid choice\n");
+        }
+    }
+    return 0;
+}
