@@ -1,0 +1,87 @@
+#include <stdio.h>
+
+int main() {
+    FILE *fp;
+    int n, num;
+
+    fp = fopen("numbers.txt", "w");  // Open file in write mode
+    if (fp == NULL) {
+        printf("Error opening file!\n");
+        return 1;
+    }
+
+    printf("Enter how many numbers you want to write: ");
+    scanf("%d", &n);
+
+    printf("Enter %d numbers:\n", n);
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &num);
+        fprintf(fp, "%d\n", num);   // Write numbers to file
+    }
+
+    fclose(fp);
+    printf("✅ Numbers written to file successfully!\n");
+
+    return 0;
+}
+
+
+
+
+
+
+#include <stdio.h>
+
+int main() {
+    FILE *fp;
+    int num;
+
+    fp = fopen("numbers.txt", "r");  // Open file in read mode
+    if (fp == NULL) {
+        printf("Error opening file!\n");
+        return 1;
+    }
+
+    printf("📘 Numbers read from file:\n");
+    while (fscanf(fp, "%d", &num) != EOF) {  // Read until end of file
+        printf("%d ", num);
+    }
+
+    fclose(fp);
+    printf("\n✅ Reading complete!\n");
+
+    return 0;
+}
+
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int *arr, n;
+
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+
+    arr = (int*) malloc(n * sizeof(int));  // allocate memory
+    if (arr == NULL) {
+        printf("Memory allocation failed!\n");
+        return 1;
+    }
+
+    printf("Enter %d elements:\n", n);
+    for (int i = 0; i < n; i++)
+        scanf("%d", &arr[i]);
+
+    printf("You entered:\n");
+    for (int i = 0; i < n; i++)
+        printf("%d ", arr[i]);
+
+    free(arr);  // free the allocated memory
+    printf("\n✅ Memory freed successfully!\n");
+
+    return 0;
+}
