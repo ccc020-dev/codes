@@ -1,0 +1,114 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+typedef struct Node{
+    int data;
+    struct Node*next;
+}Node;
+
+Node*createnode(int val){
+    Node*newnode=(Node*)malloc(sizeof(Node));
+    if(newnode==NULL){
+        printf("memory allocation failed");
+        exit(1);
+    }
+    newnode->data=val;
+    newnode->next=NULL;
+    return newnode;
+}
+
+int isEmpty(Node*top){
+    return (top==NULL);
+}
+
+Node*push(Node*top,int val){
+    Node*newnode=createnode(val);
+    newnode->next=top;
+    top=newnode;
+    printf("%d pushed into the stack\n",val);
+    return top;
+}
+
+Node*pop(Node*top){
+    if(isEmpty(top)){
+        printf("stack underflow\n");
+    }else{
+        Node*temp=top;
+        printf("%d poped from the stack",top->data);
+        top=top->next;
+        free(temp);
+    }
+    return top;
+}
+
+void peek(Node*top){
+    if (isEmpty(top)){
+        printf("stack is empty\n");
+    }else{
+        printf("top element is %d\n",top->data);
+    }
+}
+
+void display(Node*top){
+    if (isEmpty(top)){
+        printf("stack is empty\n");
+    }else{
+        Node*temp=top;
+        printf("stack elements are \n");
+        while(temp!=NULL){
+            printf("%d \n",temp->data);
+            temp=temp->next;
+        }
+    }
+}
+
+
+int main(){
+    Node*top=NULL;
+    int choice,val;
+
+    while (1) {
+        printf("\n====== STACK MENU ======\n");
+        printf("1. Push\n");
+        printf("2. Pop\n");
+        printf("3. Peek\n");
+        printf("4. isEmpty\n");
+        printf("5. Display\n");
+        printf("6. Exit\n");
+        printf("========================\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch(choice){
+            case 1:
+                printf("enter value to push");
+                scanf("%d",&val);
+                top=push(top,val);
+                break;
+            case 2:
+                top=pop(top);
+                break;
+            case 3:
+                peek(top);
+                break;
+            case 4:
+                if(isEmpty(top)){
+                    printf("stack is empty\n");
+                 } else{
+                        printf("stack is not empty\n");
+                    }
+                    break;
+            case 5:
+                    display(top);
+                    break;
+            case 6:
+                    printf("exit the program");
+                    exit(0);
+            deafult:
+                    printf("invalid choice");
+
+        }
+        }
+        return 0;
+        
+}
