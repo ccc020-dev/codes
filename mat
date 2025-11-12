@@ -1,0 +1,273 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to read a sparse matrix
+int **createSparse() {
+    int r, c, n;
+    printf("\nEnter rows, columns and number of non-zero elements: ");
+    scanf("%d%d%d", &r, &c, &n);
+
+    int **s = (int **)malloc((n + 1) * sizeof(int *));
+    for (int i = 0; i < n + 1; i++)
+        s[i] = (int *)malloc(3 * sizeof(int));
+
+    s[0][0] = r;
+    s[0][1] = c;
+    s[0][2] = n;
+
+    printf("Enter row, column and value for each non-zero element:\n");
+    for (int i = 1; i <= n; i++) {
+        scanf("%d%d%d", &s[i][0], &s[i][1], &s[i][2]);
+    }
+
+    return s;
+}
+
+// Function to display sparse matrix
+void displaySparse(int **s) {
+    if (s == NULL) {
+        printf("\nMatrix not created yet!\n");
+        return;
+    }
+
+    printf("\nRow\tCol\tVal\n");
+    for (int i = 0; i <= s[0][2]; i++)
+        printf("%d\t%d\t%d\n", s[i][0], s[i][1], s[i][2]);
+}
+
+// Function to add two sparse matrices
+int **addSparse(int **a, int **b) {
+    if (a == NULL || b == NULL) {
+        printf("\nPlease create both matrices first!\n");
+        return NULL;
+    }
+
+    if (a[0][0] != b[0][0] || a[0][1] != b[0][1]) {
+        printf("\nAddition not possible! Sizes differ.\n");
+        return NULL;
+    }
+
+    int i = 1, j = 1, k = 1;
+    int totalA = a[0][2], totalB = b[0][2];
+
+    int **sum = (int **)malloc((totalA + totalB + 1) * sizeof(int *));
+    for (int x = 0; x < (totalA + totalB + 1); x++)
+        sum[x] = (int *)malloc(3 * sizeof(int));
+
+    sum[0][0] = a[0][0];
+    sum[0][1] = a[0][1];
+
+    while (i <= totalA && j <= totalB) {
+        if (a[i][0] < b[j][0] ||
+            (a[i][0] == b[j][0] && a[i][1] < b[j][1])) {
+            sum[k][0] = a[i][0];
+            sum[k][1] = a[i][1];
+            sum[k][2] = a[i][2];
+            i++;
+        } else if (b[j][0] < a[i][0] ||
+                   (b[j][0] == a[i][0] && b[j][1] < a[i][1])) {
+            sum[k][0] = b[j][0];
+            sum[k][1] = b[j][1];
+            sum[k][2] = b[j][2];
+            j++;
+        } else {
+            int added = a[i][2] + b[j][2];
+            if (added != 0) {
+                sum[k][0] = a[i][0];
+                sum[k][1] = a[i][1];
+                sum[k][2] = added;
+            }
+            i++;
+            j++;
+        }
+        k++;
+    }
+
+    while (i <= totalA) {
+        sum[k][0] = a[i][0];
+        sum[k][1] = a[i][1];
+        sum[k][2] = a[i][2];
+        i++;
+        k++;
+    }
+
+    while (j <= totalB) {
+        sum[k][0] = b[j][0];
+        sum[k][1] = b[j][1];
+        sum[k][2] = b[j][2];
+        j++;
+        k++;
+    }
+
+    sum[0][2] = k - 1;
+    return sum;
+}
+
+int main() {
+    int choice;
+    int **A = NULL, **B = NULL, **SUM = NULL;
+
+    while (1) {
+        printf("\n===== Sparse Matrix Menu =====\n");
+        printf("1. Create Matrix A\n");
+        printf("2. Create Matrix B\n");
+        printf("3. Display Matrix A\n");
+        printf("4. Display Matrix B\n");
+        printf("5. Add Matrices (A + B)\n");
+        printf("6. Display Result Matrix\n");
+        printf("7. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("\nCreating Matrix A...");
+                A = createSparse();
+                break;
+            case 2:
+                printf("\nCreating Matrix B...");
+                B = createSparse();
+                break;
+            case 3:
+                printf("\nMatrix A:");
+                displaySparse(A);
+                break;
+            case 4:
+                printf("\nMatrix B:");
+                displaySparse(B);
+                break;
+            case 5:
+                SUM = addSparse(A, B);
+                if (SUM != NULL)
+                    printf("\nMatrices Added Successfully!");
+                break;
+            case 6:
+                printf("\nResultant Matrix (A + B):");
+                displaySparse(SUM);
+                break;
+            case 7:
+                printf("\nExiting program...\n");
+                exit(0);
+            default:
+                printf("\nInvalid choice! Try again.\n");
+        }
+    }
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+conversion
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to create sparse matrix representation
+int** createSparse(int **mat, int r, int c, int *nonZeroCount) {
+    int i, j, k = 1;
+
+    // Count non-zero elements
+    for (i = 0; i < r; i++)
+        for (j = 0; j < c; j++)
+            if (mat[i][j] != 0)
+                (*nonZeroCount)++;
+
+    // Allocate memory for sparse matrix (rows = nonZeroCount + 1)
+    int **sparse = (int**) malloc((*nonZeroCount + 1) * sizeof(int*));
+    for (i = 0; i < (*nonZeroCount + 1); i++)
+        sparse[i] = (int*) malloc(3 * sizeof(int));
+
+    // First row stores info
+    sparse[0][0] = r;
+    sparse[0][1] = c;
+    sparse[0][2] = *nonZeroCount;
+
+    // Fill sparse representation
+    for (i = 0; i < r; i++) {
+        for (j = 0; j < c; j++) {
+            if (mat[i][j] != 0) {
+                sparse[k][0] = i;
+                sparse[k][1] = j;
+                sparse[k][2] = mat[i][j];
+                k++;
+            }
+        }
+    }
+    return sparse;
+}
+
+// Function to transpose sparse matrix
+int** transposeSparse(int **sparse) {
+    int rows = sparse[0][1];
+    int cols = sparse[0][0];
+    int nonZero = sparse[0][2];
+
+    int **trans = (int**) malloc((nonZero + 1) * sizeof(int*));
+    for (int i = 0; i < (nonZero + 1); i++)
+        trans[i] = (int*) malloc(3 * sizeof(int));
+
+    trans[0][0] = rows;
+    trans[0][1] = cols;
+    trans[0][2] = nonZero;
+
+    int k = 1;
+    for (int i = 0; i < sparse[0][1]; i++) {
+        for (int j = 1; j <= nonZero; j++) {
+            if (sparse[j][1] == i) {
+                trans[k][0] = sparse[j][1];
+                trans[k][1] = sparse[j][0];
+                trans[k][2] = sparse[j][2];
+                k++;
+            }
+        }
+    }
+    return trans;
+}
+
+// Function to display sparse matrix
+void display(int **sparse) {
+    int n = sparse[0][2] + 1;
+    printf("\nRow\tCol\tVal\n");
+    for (int i = 0; i < n; i++)
+        printf("%d\t%d\t%d\n", sparse[i][0], sparse[i][1], sparse[i][2]);
+}
+
+int main() {
+    int r, c, i, j, nonZero = 0;
+    printf("Enter rows and columns of matrix: ");
+    scanf("%d%d", &r, &c);
+
+    // Dynamic allocation for matrix
+    int **mat = (int**) malloc(r * sizeof(int*));
+    for (i = 0; i < r; i++)
+        mat[i] = (int*) malloc(c * sizeof(int));
+
+    printf("Enter elements of matrix:\n");
+    for (i = 0; i < r; i++)
+        for (j = 0; j < c; j++)
+            scanf("%d", &mat[i][j]);
+
+    int **sparse = createSparse(mat, r, c, &nonZero);
+    printf("\n✅ Sparse Representation:\n");
+    display(sparse);
+
+    int **transpose = transposeSparse(sparse);
+    printf("\n🔁 Transpose (Sparse Representation):\n");
+    display(transpose);
+
+    // Advantage check
+    printf("\n✅ Using triplet format saves memory because only %d non-zero elements stored instead of %d total.\n",
+           nonZero, r * c);
+
+    return 0;
+}
