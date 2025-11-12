@@ -1,0 +1,137 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int rows, cols;
+    printf("Enter number of rows and columns: ");
+    scanf("%d %d", &rows, &cols);
+
+    // Step 1: Allocate memory for row pointers
+    int **arr = (int **)malloc(rows * sizeof(int *));
+
+    // Step 2: Allocate memory for each row
+    for (int i = 0; i < rows; i++) {
+        arr[i] = (int *)malloc(cols * sizeof(int));
+    }
+
+    // Step 3: Input elements
+    printf("Enter elements:\n");
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            scanf("%d", &arr[i][j]);
+
+    // Step 4: Print matrix
+    printf("Matrix:\n");
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++)
+            printf("%d ", arr[i][j]);
+        printf("\n");
+    }
+
+    // Step 5: Free memory
+    for (int i = 0; i < rows; i++)
+        free(arr[i]);
+    free(arr);
+
+    return 0;
+}
+
+
+
+
+
+
+#include <stdio.h>
+
+int main() {
+    int A[10][10], B[10][10], C[10][10];
+    int m, n, p, q;
+
+    printf("Enter rows and cols of A: ");
+    scanf("%d %d", &m, &n);
+    printf("Enter rows and cols of B: ");
+    scanf("%d %d", &p, &q);
+
+    if (n != p) {
+        printf("Matrix multiplication not possible!\n");
+        return 0;
+    }
+
+    printf("Enter elements of A:\n");
+    for (int i = 0; i < m; i++)
+        for (int j = 0; j < n; j++)
+            scanf("%d", &A[i][j]);
+
+    printf("Enter elements of B:\n");
+    for (int i = 0; i < p; i++)
+        for (int j = 0; j < q; j++)
+            scanf("%d", &B[i][j]);
+
+    // Multiply
+    for (int i = 0; i < m; i++)
+        for (int j = 0; j < q; j++) {
+            C[i][j] = 0;
+            for (int k = 0; k < n; k++)
+                C[i][j] += A[i][k] * B[k][j];
+        }
+
+    printf("Resultant Matrix:\n");
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < q; j++)
+            printf("%d ", C[i][j]);
+        printf("\n");
+    }
+
+    return 0;
+}
+
+
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+int main() {
+    srand(time(0)); // seed the random generator
+
+    printf("10 random numbers between 1 and 100:\n");
+    for (int i = 0; i < 10; i++) {
+        int num = rand() % 100 + 1; // range 1-100
+        printf("%d ", num);
+    }
+
+    return 0;
+}
+
+
+
+
+
+#include <stdio.h>
+#include <time.h>
+
+int main() {
+    clock_t start, end;
+    double cpu_time;
+
+    start = clock(); // start measuring
+
+    // Example work: loop
+    for (long i = 0; i < 100000000; i++);
+
+    end = clock(); // end measuring
+
+    cpu_time = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+    printf("Execution time: %f seconds\n", cpu_time);
+
+    return 0;
+}
+
+
+
+
+
