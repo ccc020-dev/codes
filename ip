@@ -1,0 +1,138 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX 100
+
+// Stack for characters (used in infix to postfix)
+char stack[MAX];
+int top = -1;
+
+void push(char x) {
+    stack[++top] = x;
+}
+
+char pop() {
+    if (top == -1)
+        return -1;
+    else
+        return stack[top--];
+}
+
+int precedence(char x) {
+    if (x == '(')
+        return 0;
+    if (x == '+' || x == '-')
+        return 1;
+    if (x == '*' || x == '/')
+        return 2;
+    return 0;
+}
+
+// Function to convert infix to postfix
+void infixToPostfix(char infix[], char postfix[]) {
+    char x;
+    int i = 0, k = 0;
+
+    while (infix[i] != '\0') {
+        if (isalnum(infix[i])) {
+            postfix[k++] = infix[i];
+        } 
+        else if (infix[i] == '(') {
+            push(infix[i]);
+        } 
+        else if (infix[i] == ')') {
+            while ((x = pop()) != '(') {
+                postfix[k++] = x;
+            }
+        } 
+        else {
+            while (precedence(stack[top]) >= precedence(infix[i])) {
+                postfix[k++] = pop();
+            }
+            push(infix[i]);
+        }
+        i++;
+    }
+
+    while (top != -1) {
+        postfix[k++] = pop();
+    }
+
+    postfix[k] = '\0';
+}
+
+// Stack for evaluating postfix
+int evalStack[MAX];
+int evalTop = -1;
+
+void evalPush(int x) {
+    evalStack[++evalTop] = x;
+}
+
+int evalPop() {
+    return evalStack[evalTop--];
+}
+
+// Function to evaluate postfix expression
+int evaluatePostfix(char postfix[]) {
+    int i, a, b, result;
+
+    for (i = 0; postfix[i] != '\0'; i++) {
+        if (isdigit(postfix[i])) {
+            evalPush(postfix[i] - '0');  // Convert char digit to int
+        } 
+        else {
+            b = evalPop();
+            a = evalPop();
+            switch (postfix[i]) {
+                case '+': result = a + b; break;
+                case '-': result = a - b; break;
+                case '*': result = a * b; break;
+                case '/': result = a / b; break;
+            }
+            evalPush(result);
+        }
+    }
+    return evalPop();
+}
+
+// Main function (Menu driven)
+int main() {
+    char infix[100], postfix[100];
+    int choice;
+
+    while (1) {
+        printf("\n---- Infix to Postfix Menu ----\n");
+        printf("1. Convert Infix to Postfix\n");
+        printf("2. Evaluate Postfix Expression\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        getchar(); // to clear buffer
+
+        switch (choice) {
+            case 1:
+                printf("Enter an infix expression: ");
+                gets(infix);
+                infixToPostfix(infix, postfix);
+                printf("Postfix Expression: %s\n", postfix);
+                break;
+
+            case 2:
+                printf("Enter a postfix expression: ");
+                gets(postfix);
+                printf("Result: %d\n", evaluatePostfix(postfix));
+                break;
+
+            case 3:
+                printf("Exiting program...\n");
+                exit(0);
+
+            default:
+                printf("Invalid choice! Try again.\n");
+        }
+    }
+    return 0;
+}
