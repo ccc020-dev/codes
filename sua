@@ -1,0 +1,123 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to check if stack is full
+int isFull(int top, int size) {
+    return (top == size - 1);
+}
+
+// Function to check if stack is empty
+int isEmpty(int top) {
+    return (top == -1);
+}
+
+// Function to push an element into stack
+void push(int *stack, int *top, int size) {
+    int val;
+    if (isFull(*top, size)) {
+        printf("\nStack Overflow! Cannot push more elements.\n");
+    } else {
+        printf("Enter value to push: ");
+        scanf("%d", &val);
+        (*top)++;
+        stack[*top] = val;
+        printf("%d pushed into stack.\n", val);
+    }
+}
+
+// Function to pop an element from stack
+void pop(int *stack, int *top) {
+    if (isEmpty(*top)) {
+        printf("\nStack Underflow! Nothing to pop.\n");
+    } else {
+        printf("%d popped from stack.\n", stack[*top]);
+        (*top)--;
+    }
+}
+
+// Function to peek at the top element
+void peek(int *stack, int top) {
+    if (isEmpty(top)) {
+        printf("\nStack is empty.\n");
+    } else {
+        printf("\nTop element is: %d\n", stack[top]);
+    }
+}
+
+// Function to display all stack elements
+void display(int *stack, int top) {
+    if (isEmpty(top)) {
+        printf("\nStack is empty.\n");
+    } else {
+        printf("\nStack elements are:\n");
+        for (int i = top; i >= 0; i--) {
+            printf("%d\n", stack[i]);
+        }
+    }
+}
+
+int main() {
+    int *stack;  // pointer for dynamically allocated stack
+    int size, choice, top = -1;
+
+    printf("********** STACK IMPLEMENTATION USING ARRAY (DMA) **********\n");
+    printf("Enter the size of the stack: ");
+    scanf("%d", &size);
+
+    // Allocate memory dynamically
+    stack = (int *)malloc(size * sizeof(int));
+
+    if (stack == NULL) {
+        printf("Memory allocation failed!\n");
+        return 1; // exit if memory not allocated
+    }
+
+    while (1) {
+        printf("\nMenu:\n");
+        printf("1. Push\n");
+        printf("2. Pop\n");
+        printf("3. Peek\n");
+        printf("4. isFull\n");
+        printf("5. isEmpty\n");
+        printf("6. Display\n");
+        printf("7. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+        case 1:
+            push(stack, &top, size);
+            break;
+        case 2:
+            pop(stack, &top);
+            break;
+        case 3:
+            peek(stack, top);
+            break;
+        case 4:
+            if (isFull(top, size))
+                printf("\nStack is Full.\n");
+            else
+                printf("\nStack is not Full.\n");
+            break;
+        case 5:
+            if (isEmpty(top))
+                printf("\nStack is Empty.\n");
+            else
+                printf("\nStack is not Empty.\n");
+            break;
+        case 6:
+            display(stack, top);
+            break;
+        case 7:
+            printf("\nExiting program... Goodbye!\n");
+            free(stack); // free dynamically allocated memory
+            exit(0);
+        default:
+            printf("\nInvalid choice! Please try again.\n");
+        }
+    }
+
+    return 0;
+}
+
