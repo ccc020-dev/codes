@@ -1,0 +1,63 @@
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+struct sockaddr_in serv_addr;
+
+int skfd, r, w, serv_addr_len;
+
+unsigned short serv_port = 25020;
+char serv_ip[] = "192.168.24.13";
+
+char rbuff[128];
+char sbuff[128] = "GoodMorning!";
+
+int main()
+{
+    bzero(&serv_addr, sizeof(serv_addr));
+    
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(serv_port);
+    inet_aton(serv_ip, &serv_addr.sin_addr);
+
+    printf("\nUDP ECHO CLIENT\n");
+
+    // Create UDP socket
+    if ((skfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    {
+        perror("\nCLIENT ERROR: Cannot create socket.");
+        exit(1);
+    }
+
+    serv_addr_len = sizeof(serv_addr);
+
+    // Send message to server
+    if ((w = sendto(skfd, sbuff, strlen(sbuff), 0, (struct sockaddr *)&serv_addr, serv_addr_len)) < 0)
+    {
+        perror("\nCLIENT ERROR: Cannot send message to the server");
+        close(skfd);
+        exit(1);
+    }
+
+    printf("\nCLIENT: Message sent to echo server.\n");
+
+    // Receive echo from server
+    if ((r = recvfrom(skfd, rbuff, sizeof(rbuff) - 1, 0, NULL, NULL)) < 0)
+    {
+        perror("\nCLIENT ERROR: Cannot receive message from server");
+        close(skfd);
+        exit(1);
+    }
+
+    rbuff[r] = '\0';
+
+    printf("CLIENT: Message from echo server: %s\n", rbuff);
+
+    close(skfd);
+    return 0;
+}
