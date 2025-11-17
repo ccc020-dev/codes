@@ -1,0 +1,102 @@
+// UDP ITERATIVE CHAT SERVER PROGRAM
+
+#include<sys/socket.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+#include<arpa/inet.h>
+#include<string.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+
+struct sockaddr_in serv_addr, cli_addr;
+int sockfd, r, w;
+socklen_t cli_addr_len;
+unsigned short serv_port = 25020; /* port number to be used by the server */
+char serv_ip[] = "192.168.24.15"; /* server's IP address */
+char buff[128];        /* buffer for receiving messages */
+char server_msg[128];  /* buffer for server messages */
+
+int main()
+{
+    /* Initialize server socket address structure with zero values */
+    bzero(&serv_addr, sizeof(serv_addr));
+    
+    /* Fill the server socket address with appropriate values */
+    serv_addr.sin_family = AF_INET;              /* address family */
+    serv_addr.sin_port = htons(serv_port);       /* port number */
+    inet_aton(serv_ip, &serv_addr.sin_addr);     /* IP address */
+    
+    printf("\nUDP ITERATIVE CHAT SERVER.\n");
+
+    /* Create socket */
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    {
+        printf("\nSERVER ERROR: Cannot create socket.\n");
+        exit(1);
+    }
+
+    /* Bind server socket address structure */
+    if (bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0)
+    {
+        printf("\nSERVER ERROR: Cannot bind\n");
+        close(sockfd);
+        exit(1);
+    }
+
+    cli_addr_len = sizeof(cli_addr);
+    printf("\nSERVER: Listening for messages from clients... Press Ctrl+C to stop.\n");
+
+    while (1)
+    {
+        /* Clear buffers */
+        bzero(buff, sizeof(buff));
+        bzero(server_msg, sizeof(server_msg));
+
+        /* Receive message from any client */
+        r = recvfrom(sockfd, buff, sizeof(buff) - 1, 0, (struct sockaddr*)&cli_addr, &cli_addr_len);
+        if (r < 0)
+        {
+            printf("\nSERVER ERROR: Error receiving message from client\n");
+            continue;
+        }
+
+        buff[r] = '\0';  // Null terminate received message
+
+        printf("\nClient %s:%d says: %s\n",
+               inet_ntoa(cli_addr.sin_addr),
+               ntohs(cli_addr.sin_port),
+               buff);
+
+        /* Check if client wants to stop */
+        if (strcmp(buff, "stop") == 0)
+        {
+            printf("SERVER: Client %s ended the chat session.\n", inet_ntoa(cli_addr.sin_addr));
+            continue;  // Go back to wait for new messages
+        }
+
+        /* Get server's reply */
+        printf("Server: ");
+        fgets(server_msg, sizeof(server_msg), stdin);
+        server_msg[strcspn(server_msg, "\n")] = '\0';  // Remove newline
+
+        /* Check if server wants to stop */
+        if (strcmp(server_msg, "stop") == 0)
+        {
+            sendto(sockfd, server_msg, strlen(server_msg), 0, (struct sockaddr*)&cli_addr, cli_addr_len);
+            printf("SERVER: Chat session ended by server.\n");
+            continue;
+        }
+
+        /* Send message to client */
+        w = sendto(sockfd, server_msg, strlen(server_msg), 0, (struct sockaddr*)&cli_addr, cli_addr_len);
+        if (w < 0)
+        {
+            printf("\nSERVER ERROR: Cannot send message to client\n");
+            continue;
+        }
+    }
+
+    close(sockfd);
+    return 0;
+}
