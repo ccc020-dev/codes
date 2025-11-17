@@ -1,0 +1,126 @@
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <dirent.h>
+
+struct sockaddr_in serv_addr, cli_addr;
+int sockfd, r, w;
+unsigned short serv_port = 25020; /* port number */
+char buffer[1024]; /* buffer for file chunks */
+
+int main() {
+    FILE *fp;
+    char filename[256], prefix[10];  // support prefix up to 9 chars + '\0'
+    struct dirent *entry;
+    DIR *dp;
+    char file_list[1024];
+    socklen_t cli_addr_len = sizeof(cli_addr);
+    char *msg;
+
+    bzero(&serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(serv_port);
+    serv_addr.sin_addr.s_addr = INADDR_ANY;  // listen on all interfaces
+
+    printf("\nUDP FILE TRANSFER SERVER.\n");
+
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        perror("SERVER ERROR: Cannot create socket");
+        exit(1);
+    }
+
+    if (bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
+        perror("SERVER ERROR: Cannot bind");
+        close(sockfd);
+        exit(1);
+    }
+
+    for (;;) {
+        printf("\nSERVER: Waiting for prefix from client...\n");
+
+        // Receive prefix from client
+        bzero(prefix, sizeof(prefix));
+        r = recvfrom(sockfd, prefix, sizeof(prefix) - 1, 0, (struct sockaddr*)&cli_addr, &cli_addr_len);
+        if (r <= 0) {
+            perror("SERVER ERROR: Cannot receive prefix");
+            continue;
+        }
+        prefix[r] = '\0';
+
+        printf("SERVER: Client %s requested files starting with '%s'\n", inet_ntoa(cli_addr.sin_addr), prefix);
+
+        // List files starting with prefix
+        dp = opendir("./");
+        if (dp == NULL) {
+            perror("SERVER ERROR: Cannot open directory");
+            continue;
+        }
+
+        bzero(file_list, sizeof(file_list));
+        while ((entry = readdir(dp)) != NULL) {
+            if (strncmp(entry->d_name, prefix, strlen(prefix)) == 0) {
+                if (strlen(file_list) + strlen(entry->d_name) + 2 < sizeof(file_list)) {
+                    strcat(file_list, entry->d_name);
+                    strcat(file_list, "\n");
+                } else {
+                    // File list too long - send what we have so far
+                    break;
+                }
+            }
+        }
+        closedir(dp);
+
+        if (strlen(file_list) == 0) {
+            msg = "No files found with the specified prefix.\n";
+            sendto(sockfd, msg, strlen(msg), 0, (struct sockaddr*)&cli_addr, cli_addr_len);
+            printf("SERVER: No files found with prefix '%s'.\n", prefix);
+            continue;
+        }
+
+        // Send file list to client
+        printf("SERVER: Sending list of files starting with '%s' to client %s\n%s\n", prefix, inet_ntoa(cli_addr.sin_addr), file_list);
+        sendto(sockfd, file_list, strlen(file_list), 0, (struct sockaddr*)&cli_addr, cli_addr_len);
+
+        // Receive filename chosen by client
+        bzero(filename, sizeof(filename));
+        r = recvfrom(sockfd, filename, sizeof(filename) - 1, 0, (struct sockaddr*)&cli_addr, &cli_addr_len);
+        if (r <= 0) {
+            perror("SERVER ERROR: Cannot receive filename");
+            continue;
+        }
+        filename[r] = '\0';
+
+        printf("SERVER: Client %s requested file: %s\n", inet_ntoa(cli_addr.sin_addr), filename);
+
+        // Open file
+        fp = fopen(filename, "rb");
+        if (fp == NULL) {
+            msg = "ERROR: File not found\n";
+            sendto(sockfd, msg, strlen(msg), 0, (struct sockaddr*)&cli_addr, cli_addr_len);
+            printf("SERVER: File not found: %s\n", filename);
+            continue;
+        }
+
+        printf("SERVER: Sending file %s to client %s\n", filename, inet_ntoa(cli_addr.sin_addr));
+
+        // Send file data in chunks
+        while ((r = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
+            w = sendto(sockfd, buffer, r, 0, (struct sockaddr*)&cli_addr, cli_addr_len);
+            if (w < 0) {
+                perror("SERVER ERROR: sendto failed");
+                break;
+            }
+        }
+
+        fclose(fp);
+        printf("SERVER: File sent to client %s\n", inet_ntoa(cli_addr.sin_addr));
+    }
+
+    close(sockfd);
+    return 0;
+}
