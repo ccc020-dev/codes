@@ -1,0 +1,74 @@
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+
+struct sockaddr_in serv_addr, cli_addr;
+
+int sockfd, r, w, cli_addr_len;
+
+unsigned short serv_port = 25020;
+char serv_ip[] = "192.168.24.15";
+
+char buff[128];
+
+int main()
+{
+    bzero(&serv_addr, sizeof(serv_addr));
+    bzero(&cli_addr, sizeof(cli_addr));
+    
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(serv_port);
+    inet_aton(serv_ip, &serv_addr.sin_addr);
+
+    printf("\nUDP ECHO SERVER.\n");
+
+    // Create UDP socket
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    {
+        perror("\nSERVER ERROR: Cannot create socket");
+        exit(1);
+    }
+
+    // Bind socket
+    if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    {
+        perror("\nSERVER ERROR: Cannot bind");
+        close(sockfd);
+        exit(1);
+    }
+
+    cli_addr_len = sizeof(cli_addr);
+
+    for (;;)
+    {
+        printf("\nSERVER: Waiting for client datagram... Press Ctrl+C to stop server\n");
+
+        // Receive datagram from client
+        if ((r = recvfrom(sockfd, buff, sizeof(buff) - 1, 0, (struct sockaddr *)&cli_addr, (socklen_t *)&cli_addr_len)) < 0)
+        {
+            perror("\nSERVER ERROR: Cannot receive message");
+            continue;
+        }
+
+        buff[r] = '\0';  // Null-terminate received data
+        printf("\nSERVER: Received \"%s\" from client %s:%d\n", buff, inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port));
+
+        // Echo back the same message to client
+        if ((w = sendto(sockfd, buff, r, 0, (struct sockaddr *)&cli_addr, cli_addr_len)) < 0)
+        {
+            perror("\nSERVER ERROR: Cannot send message");
+            continue;
+        }
+
+        printf("SERVER: Echoed back \"%s\" to %s:%d\n", buff, inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port));
+    }
+
+    close(sockfd);
+    return 0;
+}
+
