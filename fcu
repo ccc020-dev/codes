@@ -1,0 +1,118 @@
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+struct sockaddr_in serv_addr;
+int sockfd, r, w;
+unsigned short serv_port = 25020; /* server port */
+char serv_ip[] = "192.168.24.13"; /* server IP */
+char buffer[1024]; /* buffer for file chunks */
+
+int main() {
+    FILE *fp;
+    char prefix[10], filename[256], newfilename[300];
+    char file_list[1024];  // To store the list of files from the server
+    socklen_t serv_len = sizeof(serv_addr);
+
+    // Step 1: Ask the user for the prefix to search for
+    printf("Enter the first letter or prefix of the files you want to search for: ");
+    scanf("%9s", prefix);  // Accept up to 9 characters for safety
+
+    bzero(&serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(serv_port);
+    inet_aton(serv_ip, &serv_addr.sin_addr);
+
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        perror("CLIENT ERROR: Cannot create socket");
+        exit(1);
+    }
+
+    // Optional: Set timeout for receiving from server
+    struct timeval timeout;
+    timeout.tv_sec = 5;
+    timeout.tv_usec = 0;
+    setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+
+    // Step 2: Send the prefix to the server
+    w = sendto(sockfd, prefix, strlen(prefix), 0, (struct sockaddr*)&serv_addr, serv_len);
+    if (w < 0) {
+        perror("CLIENT ERROR: sendto failed (prefix)");
+        close(sockfd);
+        exit(1);
+    }
+
+    // Step 3: Receive the list of files from the server
+    bzero(file_list, sizeof(file_list));
+    r = recvfrom(sockfd, file_list, sizeof(file_list) - 1, 0, NULL, NULL);
+    if (r < 0) {
+        perror("CLIENT ERROR: recvfrom failed (file list)");
+        close(sockfd);
+        exit(1);
+    }
+
+    file_list[r] = '\0';  // Null-terminate the received list
+
+    // Step 4: Display the list of files to the user
+    printf("Files available starting with '%s':\n%s\n", prefix, file_list);
+
+    // Step 5: Ask the user to select a file from the list
+    printf("Enter the filename you want to download: ");
+    scanf("%255s", filename);
+
+    // Step 6: Send the selected filename to the server
+    w = sendto(sockfd, filename, strlen(filename), 0, (struct sockaddr*)&serv_addr, serv_len);
+    if (w < 0) {
+        perror("CLIENT ERROR: sendto failed (filename)");
+        close(sockfd);
+        exit(1);
+    }
+
+    // Step 7: Open a new file to save the received data
+    snprintf(newfilename, sizeof(newfilename), "received_%s", filename);
+    fp = fopen(newfilename, "wb");
+    if (fp == NULL) {
+        perror("CLIENT ERROR: Cannot open file to write");
+        close(sockfd);
+        exit(1);
+    }
+
+    // Step 8: Receive the file data from the server
+    while (1) {
+        r = recvfrom(sockfd, buffer, sizeof(buffer), 0, NULL, NULL);
+        if (r < 0) {
+            perror("CLIENT ERROR: recvfrom failed (file data)");
+            break;
+        }
+
+        // Check if the server sent an error message
+        if (r >= 6 && strncmp(buffer, "ERROR:", 6) == 0) {
+            printf("SERVER ERROR: %.*s", r, buffer);
+            fclose(fp);
+            remove(newfilename);
+            close(sockfd);
+            return 0;
+        }
+
+        w = fwrite(buffer, 1, r, fp);
+        if (w < r) {
+            perror("CLIENT ERROR: Write to file failed");
+            break;
+        }
+
+        // End of file if received chunk < buffer size
+        if (r < sizeof(buffer))
+            break;
+    }
+
+    printf("File received and saved as %s\n", newfilename);
+
+    fclose(fp);
+    close(sockfd);
+    return 0;
+}
