@@ -1,0 +1,43 @@
+ 
+architecture Dataflow of Mux_DF is 
+ 
+begin 
+O <= I(0) when S="00" else 
+I(1) when S="01" else 
+I(2) when S="10" else 
+I(3); 
+end Dataflow; 
+
+
+wait for 100 ns; 
+   I<="0000"; 
+   wait for 100 ns; 
+   I<="0001"; 
+   wait for 100 ns; 
+   I<="0010"; 
+   wait for 100 ns; 
+   I<="0011"; 
+ 
+      wait; 
+   end process; 
+ 
+END;
+
+
+
+ 
+begin 
+process(I,S) 
+ begin  
+  if(S="00") then 
+   Y<=I(0); 
+  elsif(S="01") then 
+   Y<=I(1); 
+  elsif(S="10") then 
+   Y<=I(2); 
+  else 
+   Y<=I(3); 
+  end if; 
+  end process; 
+ 
+end Behavioral;
