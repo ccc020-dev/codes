@@ -1,0 +1,29 @@
+ process(S,R,clk) 
+  begin 
+  if(clk' event and clk='1')then 
+   if(S='0' and R='1')then 
+    Q<='0'; 
+    QN<='1'; 
+   elsif(S='1' and R='0')then 
+    Q<='1'; 
+    QN<='0'; 
+   elsif(S='1' and R='1')then 
+    Q<='X'; 
+    QN<='X'; 
+   end if; 
+  end if; 
+ end process;   
+
+
+S<='0'; 
+  R<='0'; 
+  wait for 100 ns; 
+  S<='0'; 
+  R<='1'; 
+  wait for 100 ns; 
+  S<='1'; 
+  R<='0'; 
+  wait for 100 ns; 
+  S<='1'; 
+  R<='1'; 
+      -- insert stimulus here  
