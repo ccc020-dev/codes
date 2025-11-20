@@ -1,0 +1,17 @@
+ 
+begin 
+process(ip) 
+ begin 
+  case ip is 
+   when "000" =>op<="00000001"; 
+   when "001" =>op<="00000010"; 
+   when "010" =>op<="00000100"; 
+   when "011" =>op<="00001000"; 
+   when "100" =>op<="00010000"; 
+   when "101" =>op<="00100000"; 
+   when "110" =>op<="01000000"; 
+   when "111" =>op<="10000000"; 
+   when others=>NULL; 
+  end case; 
+end process; 
+end Behavioral;
