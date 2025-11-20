@@ -1,0 +1,33 @@
+begin 
+process(a,b,ch) 
+begin 
+case ch is 
+when "000"=>res<=a+b; 
+when "001"=>res<=a-b; 
+when "010"=>res<=a+"0001"; 
+when "011"=>res<=a-"0001"; 
+when "100"=>res<=NOT a; 
+when "101"=>res<=a OR b; 
+when "110"=>res<=a XOR b; 
+when "111"=>res<=a AND b;  
+when others=>NULL; 
+end case; 
+end process;  
+
+
+
+ch<="000"; 
+  wait for 100 ns; 
+  ch<="001"; 
+  wait for 100 ns; 
+  ch<="010"; 
+  wait for 100 ns; 
+  ch<="011"; 
+  wait for 100 ns; 
+  ch<="100"; 
+  wait for 100 ns; 
+ch<="101"; 
+wait for 100 ns; 
+ch<="110"; 
+wait for 100 ns; 
+ch<="111";
