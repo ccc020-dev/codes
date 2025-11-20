@@ -1,0 +1,48 @@
+ 
+begin 
+Sum<=A XOR (B XOR C); 
+Carry<=(A AND B) OR (B AND C) OR (A AND C);
+
+
+
+FullAdder_Behavioral is 
+begin 
+ process(A,B,C) 
+ begin 
+  if(A='0')then 
+   if(B=C)then 
+    Sum<='0'; 
+   else 
+    Sum<='1'; 
+  end if; 
+  else 
+   if(B=C)then 
+    Sum<='1'; 
+   else 
+    Sum<='0'; 
+  end if; 
+  end if; 
+ end process; 
+ process(A,B,C) 
+ begin 
+  if(A='0')then 
+   if(B='1' and C='1')then 
+    Carry<='1'; 
+   else 
+    Carry<='0'; 
+  end if; 
+  else 
+   if(B='0' and C='0')then 
+    Carry<='0'; 
+   else 
+    Carry<='1'; 
+  end if; 
+  end if; 
+  end process; 
+ 
+end Behavioral; 
+ 
+ 
+ 
+ 
+TEST BENCH CODE:
