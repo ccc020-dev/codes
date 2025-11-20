@@ -1,0 +1,33 @@
+entity Decoder3_8_DF is 
+Port ( ip : in  STD_LOGIC_VECTOR (2 downto 0); 
+op : out  STD_LOGIC_VECTOR (7 downto 0)); 
+end Decoder3_8_DF; 
+architecture Dataflow of Decoder3_8_DF is 
+begin 
+op(0)<='1' when ip="000" else '0'; 
+op(1)<='1' when ip="001" else '0'; 
+op(2)<='1' when ip="010" else '0'; 
+op(3)<='1' when ip="011" else '0'; 
+op(4)<='1' when ip="100" else '0'; 
+op(5)<='1' when ip="101" else '0'; 
+op(6)<='1' when ip="110" else '0'; 
+op(7)<='1' when ip="111" else '0'; 
+end Dataflow;
+
+
+ip<="000"; 
+  wait for 100 ns;  
+  ip<="001"; 
+  wait for 100 ns;  
+  ip<="010"; 
+  wait for 100 ns;  
+  ip<="011"; 
+  wait for 100 ns;  
+  ip<="100"; 
+  wait for 100 ns;  
+  ip<="101"; 
+  wait for 100 ns;  
+  ip<="110"; 
+  wait for 100 ns;  
+  ip<="111"; 
+      --wait for <clock>_period*10
